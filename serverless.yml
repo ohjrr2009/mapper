@@ -1,0 +1,80 @@
+service: mapper-api
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: python3.8
+  logRetentionInDays: 1
+  stage: dev
+  region: 'us-east-2'
+  lambdaHashingVersion: 20201221
+  versionFunctions: false
+  stackName: dev-mapper-api-stack
+  memorySize: 128
+
+package:
+  individually: true
+
+functions:
+  - ${file(src/functions/map/post/lambda.yml)}
+  - ${file(src/functions/template/get/lambda.yml)}
+  - ${file(src/functions/template/patch/lambda.yml)}
+  - ${file(src/functions/template/post/lambda.yml)}
+
+layers:
+  MapperApi:
+    path: layer
+    name: mapper-api-lambda-layer
+    description: Layer that has the necessary dependencies for the API
+    compatibleRuntimes:
+      - python3.8
+
+plugins:
+  - serverless-plugin-resource-tagging
+  - serverless-iam-roles-per-function
+  - serverless-pseudo-parameters
+  - serverless-plugin-tracing
+
+resources:
+  Resources:
+    dbMapperApiTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        TableName: dev-mapper-dynamodb-table-templates
+        BillingMode: PAY_PER_REQUEST 
+        Tags:
+          - Key: "backup-type"
+            Value: "default"
+        AttributeDefinitions:
+          - AttributeName: mapId
+            AttributeType: S
+          - AttributeName: product
+            AttributeType: S
+          - AttributeName: operation
+            AttributeType: S
+          - AttributeName: inputType
+            AttributeType: S
+          - AttributeName: outputType
+            AttributeType: S
+        KeySchema:
+          - AttributeName: mapId
+            KeyType: HASH
+        GlobalSecondaryIndexes: 
+          - IndexName: product-operation-index
+            KeySchema: 
+              - AttributeName: product
+                KeyType: HASH
+              - AttributeName: operation
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: inputType-outputType-index
+            KeySchema: 
+              - AttributeName: inputType
+                KeyType: HASH
+              - AttributeName: outputType
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL

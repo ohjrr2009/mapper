@@ -1,0 +1,4 @@
+name: ${self:provider.stage}-internal-api
+path: /
+resources:
+  - /core

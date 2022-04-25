@@ -1,0 +1,16 @@
+{
+  "name": "mapper",
+  "description": "",
+  "version": "1.0.0",
+  "dependencies": {
+    "serverless-iam-roles-per-function": "^3.2.0",
+    "serverless-import-apigateway": "^1.1.1",
+    "serverless-plugin-resource-tagging": "^1.1.1",
+    "serverless-plugin-tracing": "^2.0.0",
+    "serverless-pseudo-parameters": "^2.6.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "deploy": "rm -f -R .build/ .serverless/"
+  }
+}

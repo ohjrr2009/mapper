@@ -1,0 +1,29 @@
+patch-template:
+  name: ${self:service}-patch-template
+  handler: src/functions/template/patch/handler.lambda_handler
+  environment:
+    dbtable_templates: '#{dbMapperApiTable}'
+  timeout: 30
+  layers:
+    - {Ref: MapperApiLambdaLayer}
+  package:
+      patterns:
+        - '!**'
+        - 'src/functions/template/patch/handler.py'
+  events:
+    - http:
+        path: core/mapper/template
+        method: patch
+        # integration: lambda
+  iamRoleStatements:
+    - Effect: Allow      
+      Action:
+        - dynamodb:UpdateItem
+        - dynamodb:GetItem
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:PutItem
+        - dynamodb:DeleteItem
+      Resource: 
+        - '#{dbMapperApiTable.Arn}'
+        - '#{dbMapperApiTable.Arn}/index/*'

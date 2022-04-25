@@ -1,0 +1,1 @@
+pip install --upgrade -r requirements.txt -t ./layer/python/lib/python3.8/site-packages --no-user

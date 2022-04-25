@@ -1,0 +1,29 @@
+get-template:
+  name: ${self:service}-get-template
+  handler: src/functions/template/get/handler.lambda_handler
+  environment:
+    dbtable_templates: '#{dbMapperApiTable}'
+  timeout: 30
+  layers:
+    - {Ref: MapperApiLambdaLayer}
+  package:
+      patterns:
+        - '!**'
+        - 'src/functions/template/get/handler.py'
+  events:
+    - http:
+        path: core/mapper/template
+        method: get
+        # integration: lambda
+  iamRoleStatements:
+    - Effect: Allow      
+      Action:
+        - dynamodb:UpdateItem
+        - dynamodb:GetItem
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:PutItem
+        - dynamodb:DeleteItem
+      Resource: 
+        - '#{dbMapperApiTable.Arn}'
+        - '#{dbMapperApiTable.Arn}/index/*'
