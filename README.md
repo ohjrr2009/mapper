@@ -1,29 +1,29 @@
-# Descrição
+# Description
 
-Projeto que define a API REST para ser utilizada como ferramenta de mapeamento e/ou conversão de payloads, quais sejam:
+Project that defines the REST API to be used as a payload mapping and/or conversion tool, between the following formats:
 * **JSON -> JSON**
 * **JSON -> XML**
 * **XML -> JSON**
 * **XML -> XML**
 
-Cada conversão se utiliza de Templates escritos em [**Velocity Template Language (VTL)**](https://velocity.apache.org/engine/1.7/user-guide.html), dessa maneira grande parte das funções VTL conhecidas podem ser utilizadas.
+Each mapping uses Templates written in [**Velocity Template Language (VTL)**](https://velocity.apache.org/engine/1.7/user-guide.html), in this way most of the known VTL functions can be used for elaborating Templates.
 
-O Projeto, no entanto, ainda permite a adição de Funções Genéricas Customizadas e Funções Customizadas ao nível de domínio, bastando para tanto, adicionar tais funções no script em Python denominado [mapper.py](layer/python/lib/python3.8/site-packages/mapper.py) (script esse que faz parte da Layer **mapper-api-lambda-layer**) 
+The Project, however, still allows the addition of Generic Custom Functions and Custom Functions at the domain level, simply by adding such functions in the Python script called [mapper.py](layer/python/lib/python3.8/site-packages/mapper.py) (script that is part of the Layer **mapper-api-lambda-layer**) 
 
-O Projeto foi escrito com uso da linguagem **Python 3.8** e usa como **motor VTL** o [**AirSpeed**](https://github.com/purcell/airspeed).
+The Project was written using the language **Python 3.8** and use [**AirSpeed**](https://github.com/purcell/airspeed) as **VTL Engine**.
 
-Macros em VTL também são permitidas e seguem os padrões de escrita estabelecidos pela linguagem. Tais macros podem ser adicionadas ao processo de mapeamento embutidas junto ao Template ou mesmo como uma lista de macros a ser passada para a função de mapeamento.
+Macros in VTL are also allowed and follow the writing standards established by the language. Such macros can be added to the mapping process embedded in the Template or even as a list of macros to be passed to the mapping function.
 
-## Preparando o Ambiente de Desenvolvimento e Testes
-### Instalações
-É preciso ter instalado em sua máquina as seguintes tecnologias para poder atuar no projeto:
+## Preparing the Development and Test Environment
+### Installation
+You must have the following technologies installed on your machine to be able to work on the project:
 * [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
 * [npm](https://www.npmjs.com/get-npm)
 * [Serverless Framework](https://www.serverless.com/framework/docs/getting-started/)
-* [VS Code](https://code.visualstudio.com/Download) como IDE sugerida
+* [VS Code](https://code.visualstudio.com/Download) or another IDE
 
 ### Configurações
-Para testar o projeto em ambiente de desenvolvimento é necessário possuir configurado em sua máquina o AWS CLI, que é o client para publicar o projeto como uma stack via AWS Cloudformation. Para isso, é preciso, com o AWS CLI instalado, abra um promt de comando e digite o comando a seguir, respondendo as perguntas em seguida conforme o exemplo abaixo, conforme orientado na [documentação oficial](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html):
+To test the project in the development environment, you must have the AWS CLI configured on your machine, which is the client to publish the project as a stack via AWS Cloudformation. To do this, you need, with the AWS CLI already installed, open a command prompt and type the following command, answering the questions then as shown in the example below, as instructed in [official docs](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html):
 
 ```bash
 $ aws configure
@@ -33,32 +33,30 @@ Default region name [None]: us-east-2
 Default output format [None]: json
 ```
 
-Entre em contato com o time de infraestrutura para obter o **AWS Access Key ID** e o **AWS Secret Access Key** para o ambiente de desenvolvimento.
+## Deployment Procedures
+This project is composed of source code written in Python and exposes 4 endpoints in an Api Gateway.
 
-## Procedimentos de Deploy
-Este projeto é composto pelo código fonte escrito em Python e expõe 4 endpoints na Api Gateway denominada **\<env>-internal-api**.
-
-Para a realização do deploy  do projeto em **dev** basta que no prompt de comando executemos o seguinte comando dentro do diretório raiz do projeto.
+To deploy the project in **dev**, just run the following command from the command prompt inside the project's root directory.
 
 ```bash
-$ sls deploy --env dev
+$ sls deploy
 ```
 
-Caso você queira remover a stack criada, utilize o comando:
+If you want to remove the created stack, use the command:
 
 ```bash
-$ sls remove --env dev
+$ sls remove
 ```
 
-## MAPPER - Especificação dos Endpoints da API REST
+## MAPPER - Specifying REST API Endpoints
 
-**MAPPER - Endpoints da API REST em DEV**
+**MAPPER - REST API endpoints in DEV Environment**
 
 * **POST_MAP**
-  * **POST** - https://05ovjshnib.execute-api.us-east-2.amazonaws.com/dev/core/mapper/map
-   * **Descrição:** Endpoint dedicado ao mapeamento de um determinado payload conforme as regras estabelecidas pelo Template
-   * **Parâmetros:**
-     *  *body*:string (Body - Obrigatório) - O body é composto por 2 propriedades obrigatórias que são **config** e **payload**. A primeira é responsável por passar as informações relacionadas com o Template (*mapId*) e o tipo de origem do processo de mapeamento (*inputOrigin*). A segunda é responsável por armazenar o payload que efetivamente será convertido/mapeado conforme as regras estabelecidas no Template em questão. Existem 2 tipos de **inputOrigin**: **AWS_EVENT** e **DEFAULT**. O tipo **DEFAULT** é o padrão e serve para qualquer tipo de payload seja JSON ou XML, a raiz do documento em questão será referenciada dentro do Template em VTL pela propriedade **inputRoot**. No caso do tipo **AWS_EVENT**, esse é utilizado quando um evento recebido por um AWS Lambda deve ser lido e mapeado, nessa situação, mais propriedades estarão disponíveis dentro do Template VTL, quais sejam: **inputRoot**, **inputHeaders**, **inputQueryStringParameters**, **inputpathParameters** e **inputBody**.
+  * **POST** - https://<env>/dev/core/mapper/map
+   * **Description:** Endpoint dedicated to mapping a particular payload according to the rules established by the Template
+   * **Parameters:**
+     *  *body*:string (Body - mandatory) - The body is composed of 2 mandatory properties which are **config** and **payload**. The first is responsible for passing information related to the Template (*mapId*) and the origin type of the mapping process (*inputOrigin*). The second is responsible for storing the payload that will actually be converted/mapped according to the rules established in the Template. There are 2 types of **inputOrigin**: **AWS_EVENT** and **DEFAULT**. The **DEFAULT** type is the default and is used for any type of payload, whether JSON or XML, the root of the document in question will be referenced within the Template in VTL by the **inputRoot** property. In the case of the **AWS_EVENT** type, this is used when an event received by an AWS Lambda must be read and mapped, in this situation, more properties will be available within the VTL Template, namely: **inputRoot**, ** inputHeaders**, **inputQueryStringParameters**, **inputpathParameters** and **inputBody**.
 
         ```JSON
         {
@@ -69,61 +67,61 @@ $ sls remove --env dev
             "payload": event
         }
         ```
-    * **Retornos:**
-      - **201**: Indica que o processo de mapeamento foi realizado com sucesso. No Header o campo **Content-Type** será definido como **text/xml** se o **outputType** do Template for XML ou **application/json**, caso contrário.
-        - Corpo de retorno para o caso **outputType** igual a JSON:
+    * **Responses:**
+      - **201**: Indicates that the mapping process was successful. In the header the field **Content-Type** will be defined as **text/xml** if the **outputType** of the Template is XML or **application/json**, otherwise.
+        - Response body for case **outputType** as a JSON:
           ```JSON
           {
             "requestId": string,
             "data": string
           }
           ```
-        - Corpo de retorno para o caso **outputType** igual a XML:
+        - Response body for case **outputType** as a XML:
           ```XML
           <?xml version="1.0" encoding="UTF-8"?>
           <nome_da_tag_raiz>
             ...
           </nome_da_tag_raiz>
           ```
-      - **400**: Bad Request, indicando que não foi possivel realizar o processo de conversão com o mapId e o input fornecido.
+      - **400**: Bad Request, indicating that it was not possible to carry out the mapping process with the mapId and the input provided.
         ```JSON
         {
           "status":400,
           "code":"BAD REQUEST",
           "title":"Bad Request",
-          "detail":"Não foi possivel realizar o processo de conversão com o mapId e o input fornecido. Favor verificar o log e/ou contate o administrador do sistema."
+          "detail":"It was not possible to perform the conversion process with the mapId and the input provided. Please check the log and/or contact your system administrator."
         }
         ```
-      - **403**: Forbidden, indicando que não foi possivel realizar o processo de conversão com o mapId fornecido por ele estar desativado.
+      - **403**: Forbidden, indicating that it was not possible to perform the conversion process with the mapId provided because it is disabled.
         ```JSON
         {
             "requestId": requestID,
             "errors":[
                 {
                     "status":403,
-                    "code":"TEMPLATE NÃO ESTÁ ATIVO E NÃO PODE SER USADO",
-                    "title":"Template de mapeamento não está ativo",
-                    "detail":"O mapId informado corresponde a um template desativado."
+                    "code":"TEMPLATE IS NOT ACTIVE AND CANNOT BE USED",
+                    "title":"Mapping template is not active",
+                    "detail":"The mapId informed corresponds to a deactivated template."
                 }
             ]
         }
         ```
-      - **404**: O mapId informado não possui nenhum template associado.
+      - **404**: The mapId informed does not have any associated template.
         ```JSON
         {
           "status":404,
-          "code":"TEMPLATE DE MAPEAMENTO NÃO ENCONTRADO",
-          "title":"Template de mapeamento não encontrado",
-          "detail":"O mapId informado não possui nenhum template associado."
+          "code":"MAPPING TEMPLATE NOT FOUND",
+          "title":"Mapping template not found",
+          "detail":"The mapId informed does not have any associated template."
         }
         ``` 
   
 
 * **POST_MAPPER_TEMPLATE**
-  * **POST** - https://05ovjshnib.execute-api.us-east-2.amazonaws.com/dev/core/mapper/template
-   * **Descrição:** Insere um novo template na tabela **\<env>-mapper-dynamodb-table-templates**
-   * **Parâmetros:**
-     *  *body*:string (Body - Obrigatório) - O body é composto pelas propriedades abaixo:
+  * **POST** - https://<env>/dev/core/mapper/template
+   * **Description:** Insert a new template into the table **\<env>-mapper-dynamodb-table-templates**
+   * **Parameters:**
+     *  *body*:string (Body - mandatory) - The body is composed with the properties below:
         ```JSON
         {
           "product": string,
@@ -138,10 +136,10 @@ $ sls remove --env dev
           "currentTemplate": string
         }
         ```
-        Adicionalmente durante o processo de inserção, as propriedades **mapId** (é um **UUID v4**), *templateVersions*, *insertionDate*, *updateDate* e *active* (*true* por padrão) serão adicionadas ao registro na tabela. Ressalta-se que o mapId será gerado automaticamente pelo endpoint.
+        Additionally during the insertion process, the properties **mapId** (it's a **UUID v4**), *templateVersions*, *insertionDate*, *updateDate* and *active* (*true* by default) will be added to the item in the table. It should be noted that the mapId will be automatically generated by the endpoint.
 
-    * **Retornos:**
-      - **201**: Indica que o processo de inserção do template foi realizado com sucesso.
+    * **Responses:**
+      - **201**: Indicates that the template insertion process was successful.
           ```JSON
           {
             "requestId": string,
@@ -150,7 +148,7 @@ $ sls remove --env dev
             }
           }
           ```
-      - **500**: Erro interno de servidor, indicando que não foi possivel realizar o processo de inserção do Template com os parâmetros fornecidos.
+      - **500**: Internal server error, indicating that it was not possible to perform the template insertion process with the parameters provided.
         ```JSON
         {
           "requestId": string,
@@ -158,30 +156,30 @@ $ sls remove --env dev
             {
               "status":500,
               "code":"INTERNAL SERVER ERROR",
-              "title":"Erro Interno de Servidor",
-              "detail":"Não foi possivel realizar a inserção do item. Favor verificar o log e/ou contate o administrador do sistema."
+              "title":"Internal Server Error",
+              "detail":"Unable to insert the item. Please check the log and/or contact your system administrator."
             }
           ]
         }
         ```
 
 * **GET_MAPPER_TEMPLATE**
-  * **GET** - https://05ovjshnib.execute-api.us-east-2.amazonaws.com/dev/core/mapper/template
-   * **Descrição:** Retorna uma lista de Templates. Para realização da consulta, deve ser utilizado ao menos um dos seguintes parâmetros: **mapId**, **product**, **inputType**. O parâmetro **lastEvaluatedKey** deve ser sempre passado para garantir o processo de consulta paginada. O parâmetro **lastEvaluatedKey** sempre está presente nos retornos da página como resultado da consulta.
-   * **Parâmetros:**
-     *  *mapId*:string (Query - Opcional) - é o UUID que representa o template. Esse campo deve ser utilizado sempre que se quiser restringir a consulta buscando apenas o template com o mapId informado.
-     *  *product*:string (Query - Opcional) - é a categoria de templates relacionados por produto (ex. pix).
-     *  *subproduct*:string (Query - Opcional) - é a categoria de templates relacionados por subproduto (ex. post_dict_chave, post_mliq_entrada_tratarpix).
-     *  *operation*:string (Query - Opcional) - é a categoria de templates relacionados por operação (ex. afr_mapping).
-     *  *suboperation*:string (Query - Opcional) - é a categoria de templates relacionados por operação (ex. afr_mapping_risco_dict, afr_mapping_risco_mliq).
-     *  *inputType*:string (Query - Opcional) - indica o tipo de input do payload [XML ou JSON].
-     *  *outputType*:string (Query - Opcional) - indica o tipo de output do payload [XML ou JSON].
-     *  *active*:string (Query - Opcional) - indica se o template está ativo ou não para realização de mapeamento.
-     *  *size*:string (Query - Opcional) - tamanho da página a ser retornada. Default: 100.
-     *  *lastEvaluatedKey*:string (Query - Opcional) - indica o valor da última chave retornada na página. Esse parâmetro é utilizado para se continuar o processo de paginação juntamente ao DynamoDB, caso não seja utilizado, a consulta sempre retornará a primeira página.
+  * **GET** - https://<env>/dev/core/mapper/template
+   * **Description:** Returns a list of Templates. To perform the query, at least one of the following parameters must be used: **mapId**, **product**, **inputType**. The **lastEvaluatedKey** parameter must always be passed to ensure the paging process. The **lastEvaluatedKey** parameter is always present in the page response as a result of the query.
+   * **Parameters:**
+     *  *mapId*:string (Query - Optional) - is the UUID that represents the template. This field must be used whenever you want to restrict the query by looking for only the template with the informed mapId.
+     *  *product*:string (Query - Optional) - is the category of related templates by product.
+     *  *subproduct*:string (Query - Optional) - is the category of templates related by subproduct.
+     *  *operation*:string (Query - Optional) - is the category of templates related by operation.
+     *  *suboperation*:string (Query - Optional) - is the category of templates related by operation.
+     *  *inputType*:string (Query - Optional) - indicates the type of payload input [XML or JSON].
+     *  *outputType*:string (Query - Optional) - indicates the type of payload output [XML or JSON].
+     *  *active*:string (Query - Optional) - indicates whether the template is active or not for mapping.
+     *  *size*:string (Query - Optional) - page size to be returned. Default: 100.
+     *  *lastEvaluatedKey*:string (Query - Optional) - indicates the value of the last key returned on the page. This parameter is used to continue the paging process together with DynamoDB, if not used, the query will always return the first page.
 
-   * **Retornos:**
-      - **200**: Indica que o processo de inserção do template foi realizado com sucesso.
+   * **Responses:**
+      - **200**: Indicates that the template insertion process was successful.
           ```JSON
           {
             "meta": {
@@ -200,7 +198,7 @@ $ sls remove --env dev
             ]
           }
           ```
-      - **400**: Erro interno de servidor, indicando que não foi possivel realizar o processo de inserção do Template com os parâmetros fornecidos.
+      - **400**: Internal server error, indicating that it was not possible to perform the template insertion process with the parameters provided.
         ```JSON
         {
           "requestId":"a30ed1e4-de62-11eb-ba80-0242ac130004",
@@ -209,20 +207,20 @@ $ sls remove --env dev
               "status":400,
               "code":"BAD REQUEST",
               "title":"Bad Request",
-              "detail":"Para realização da consulta, utilize ao menos um dos seguintes parâmetros: mapId, product, inputType"
+              "detail":"To perform the query, use at least one of the following parameters: mapId, product, inputType"
             }
           ]
         }
         ```
 
 * **PATCH_MAPPER_TEMPLATE**
-  * **PATCH** - https://05ovjshnib.execute-api.us-east-2.amazonaws.com/dev/core/mapper/template
-   * **Descrição:** Atualiza um template da tabela **\<env>-mapper-dynamodb-table-templates**
-   * **Parâmetros:**
-     *  *body*:string (Body - Obrigatório) - O body é composto pelas propriedades abaixo:
+  * **PATCH** - https://<env>/dev/core/mapper/template
+   * **Description:** Update a table template **\<env>-mapper-dynamodb-table-templates**
+   * **Parameters:**
+     *  *body*:string (Body - mandatory) - The body is composed of the properties below:
         ```JSON
         {
-          "mapId": string (campo Obrigatório),
+          "mapId": string (mandatory field),
           "product": string,
           "subproduct": string,
           "operation": string,
@@ -237,47 +235,47 @@ $ sls remove --env dev
         }
         ```
 
-    * **Retornos:**
-      - **201**: Indica que o processo de inserção do template foi realizado com sucesso.
+    * **Responses:**
+      - **201**: Indicates that the template insertion process was successful.
           ```JSON
           {
             "requestId": string,
             "data": {
-                ...item inserido...
+                ...inserted item...
             }
           }
           ```
-      - **400**: Bad Request, indicando que não foi possivel realizar o processo de atualização do Template com os parâmetros fornecidos.
+      - **400**: Bad Request, indicating that it was not possible to perform the Template update process with the parameters provided.
         ```JSON
         {
           "requestId": string,
           "errors": [
             {
               "status":400,
-              "code":"REQUISIÇÃO INVÁLIDA",
-              "title":"Requisição Inválida",
-              "detail":"O campo obrigatório mapId não foi encontrado no corpo da requisição."
+              "code":"INVALID REQUEST",
+              "title":"Invalid Request",
+              "detail":"Mandatory field mapId not found in request body."
             }
           ]
         }
         ```
-      - **404**: NOT FOUND, indicando que não foi possivel realizar o processo de atualização do Template com os parâmetros fornecidos.
+      - **404**: NOT FOUND, indicating that it was not possible to perform the Template update process with the parameters provided.
         ```JSON
         {
           "requestId": string,
           "errors": [
             {
               "status":404,
-              "code":"MAPEAMENTO NÃO ENCONTRADO",
-              "title":"Mapeamento não encontrado",
-              "detail":"Não foi possível encontrar o mapeamento com o referido mapId."
+              "code":"MAPPING NOT FOUND",
+              "title":"Mapping not found",
+              "detail":"Could not find mapping with the given mapId."
             }
           ]
         }
         ```
 
 ## Utilização
-Abaixo seguem exemplos dos 4 tipos de mapeamento permitidos para o Mapper:
+Below are examples of the 4 types of mapping allowed for Mapper:
 
 * **JSON -> JSON**
   * **INPUT**
@@ -307,7 +305,7 @@ Abaixo seguem exemplos dos 4 tipos de mapeamento permitidos para o Mapper:
     }
     ```
 
-  * **TEMPLATE DE EXEMPLO**
+  * **EXAMPLE OF TEMPLATE**
     ```JSON
     {
       "name": {
@@ -318,7 +316,7 @@ Abaixo seguem exemplos dos 4 tipos de mapeamento permitidos para o Mapper:
         "ativo2": #validate($inputRoot.ativo2, "string")
       },
       #if ($!inputRoot.birthplace)
-        "birthplace": "CAMPO NÃO EXISTE E NÃO SERÁ MOSTRADO",
+        "birthplace": "FIELD DOES NOT EXIST AND WILL NOT BE SHOWN",
       #end
       "mobile": #validate($inputRoot.mobile, "string"),
       "role":  #validate($inputRoot.role, "object"),
@@ -387,7 +385,7 @@ Abaixo seguem exemplos dos 4 tipos de mapeamento permitidos para o Mapper:
       }
     }
     ```
-  * **TEMPLATE DE EXEMPLO**
+  * **EXAMPLE OF TEMPLATE**
     ```XML
     <audience>
       <id what=#validate($inputRoot.audience.id.what, "string")>#validate($inputRoot.audience.id.text, "object")</id>
@@ -425,7 +423,7 @@ Abaixo seguem exemplos dos 4 tipos de mapeamento permitidos para o Mapper:
       </subjects>
     </student>
     ```
-  * **TEMPLATE DE EXEMPLO**
+  * **EXAMPLE OF TEMPLATE**
     ```JSON
     {
       "student": {
@@ -494,7 +492,7 @@ Abaixo seguem exemplos dos 4 tipos de mapeamento permitidos para o Mapper:
       </subjects>
     </student>
     ```
-  * **TEMPLATE DE EXEMPLO**
+  * **EXAMPLE OF TEMPLATE**
     ```XML
     <estudante>
       <id>#validate($inputRoot.student.id, "object")</id>
@@ -535,29 +533,24 @@ Abaixo seguem exemplos dos 4 tipos de mapeamento permitidos para o Mapper:
     </estudante>
     ```
 * **Observações:**
-  * A função de macro **#validate(\$field, \<type>)** é uma macro criada para ser utilizada opcionalmente, mesmo estando disponível na ferramenta Mapper. A principal finalidade da função é evitar que retornos mal-processados pelo motor VTL existam no output (ex. string com código VTL ou blank). Recomenda-se, portanto, que a macro sempre seja utilizada. A função recebe como entrada 02 (dois) parâmetros: $field (que é o campo do input onde será lido o dado de entrada para ser validado) e \<type> que pode ser qualquer um dos tipos:
-    * **"string"**: garante que o dado validado será retornado como string
-    * **"number"**: garante que o dado validado será retornado como number
-    * **"boolean"**: garante que o dado validado será retornado como boolean
-    * **"object"**: garante que o dado validado será retornado sem nenhuma alteração em relação ao original
+  * The **#validate(\$field, \<type>)** macro function is a macro created to be used optionally, even though it is available in the Mapper tool. The main purpose of the function is to prevent returns badly processed by the VTL engine from existing in the output (eg. string with VTL code or blank). It is therefore recommended that the macro is always used. The function receives as input 02 (two) parameters: $field (which is the input field where the input data will be read to be validated) and \<type> which can be any of the types:
+    * **"string"**: guarantees that the validated data will be returned as a string
+    * **"number"**: guarantees that the validated data will be returned as a number
+    * **"boolean"**: guarantees that the validated data will be returned as a boolean
+    * **"object"**: guarantees that the validated data will be returned unchanged from the original
 
-## FUNÇÕES CUSTOMIZADAS
-  * Adicionalmente as funções básicas do motor VTL, a ferramenta Mapper disponibiliza ainda as seguintes funções de uso genérico:
-    * **"string".substring(start, end)**: retorna uma substring de uma string dada passando como parâmetros os índices de início e fim. Ex.
+## CUSTOM FUNCTIONS
+  * In addition to the basic functions of the VTL engine, the Mapper tool also provides the following general-purpose functions:
+    * **"string".substring(start, end)**: returns a substring of a given string passing the start and end indices as parameters. Ex.
       ```
       "countryCode": #validate($inputBody.txChave.substring(1, 3), "number")
       ```
-    * **"string".contains(text)**: retorna um booleano indicando se uma determinada cadeia de caracteres está contida ou não em outra.
-    * **"string".convert_timezone(from_tz, to_tz)**: converte um date_time de uma timezone, representado por uma string, em outro date_time de outra time_zone e retorma a nova representação no pattern **("%Y-%m-%dT%H:%M:%S.%fZ")**. Ex.
+    * **"string".contains(text)**: returns a boolean indicating whether or not a given string is contained in another.
+    * **"string".convert_timezone(from_tz, to_tz)**: convert a datetime from one timezone, represented by a string, to another date_time from another time_zone and return the new representation in the pattern **("%Y-%m-%dT%H:%M:%S.%fZ")**. Ex.
       ```
       "referenceDate": #validate($inputHeaders.timestamp.convert_timezone(0,0), "string")
       ```
-    * **"string".get_date(str_time)**: extrai apenas a data de um date_time representado por uma string, o pattern da data final deve ser passado como parâmetro para a função. Ex.  
+    * **"string".get_date(str_time)**: extracts only the date from a date_time represented by a string, the pattern of the end date must be passed as a parameter to the function. Ex.  
       ```
       "openingDate": #validate($inputBody.pix.dtPagto.get_date("%Y-%m-%dT00:00:00.000+00:00"), "string")
-      ```
-  * Além das funções básicas do motor VTL e as de uso genérico mencionadas acima, a ferramenta Mapper também disponibiliza funções de domínio de negócio. Caso seja necessário acrescentar mais funções desse tipo, uma implementação em código deverá ser realizada:
-    * **"string".get_key_type(text)**: retorna o tipo de chave (PIX) de acordo com o texto de entrada, os retornos possíveis serão (EMAIL, PHONE, CPF, CNPJ, EVP ou uma string vazia, quando não existe correspondência). Ex.
-      ```
-      "type": #validate($inputBody.pix.txChaveRecebedor.get_key_type(), "string")
       ```
